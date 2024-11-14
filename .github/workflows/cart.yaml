@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - '**.js'  # Only trigger on changes to Python files (**.py)
+      - '**.js'  # 
       - '.github/workflows/cart.yaml'  # Include workflow file changes
 
   pull_request:
