@@ -33,4 +33,4 @@ jobs:
           
       - name: Push Docker image to GCR
         run: |
-          docker push gcr.io/kubernetesproject
+          docker push gcr.io/kubernetesproject/cart:latest
