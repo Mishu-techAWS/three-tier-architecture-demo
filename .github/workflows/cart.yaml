@@ -29,8 +29,8 @@ jobs:
       - name: Build Docker image
         working-directory: ./cart
         run: |
-          docker build -t gcr.io/kubernetesproject/cart:latest .
+          docker build -t cart:latest .
           
       - name: Push Docker image to GCR
         run: |
-          docker push gcr.io/kubernetesproject/cart:latest
+          docker push asia-south2-docker.pkg.dev/iconic-vine-445014-t7/kubernetesproject/cart:latest
