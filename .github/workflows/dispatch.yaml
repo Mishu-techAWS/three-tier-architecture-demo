@@ -1,44 +1,44 @@
-name: Dispatch
-
+name: dispatch
 on:
   push:
     branches:
       - master
     paths:
-      - '**.go'  # Only trigger on changes to Python files (**.py)
-      - '.github/workflows/dispatch.yaml'  # Include workflow file changes
-
+      - 'dispatch/**'
+      - '.github/workflows/dispatch.yaml'
   pull_request:
     branches:
       - master
     paths:
-      - '**.go'  # Only trigger on changes to Python files (**.py)
-      - '.github/workflows/dispatch.yaml'  # Include workflow file changes
-
+      - 'dispatch/**'
+      - '.github/workflows/dispatch.yaml'
 jobs:
-  payment:
-    name: Build and deploy dispatch microservice
-    runs-on: [self-hosted]  # Use a standard runner instead of self-hosted
-
+  cart:
+    name: Build and deploy cart microservice
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout code 
+      - name: Checkout code
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
-      - name:  Go install
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker auth
         run: |
-            curl -sL https://dl.google.com/go/go1.18.linux-amd64.tar.gz |
-            export PATH=$PATH:/home/runner/go/bin
+          gcloud auth configure-docker asia-south2-docker.pkg.dev
 
       - name: Build Docker image
+        working-directory: ./dispatch
         run: |
-          docker build -t payment .  # Build image tagged as 'payment' from current directory
-
-      - name: Docker Login (use secrets)
-        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Docker Push
+          docker build -t asia-south2-docker.pkg.dev/iconic-vine-445014-t7/kubernetesproject/dispatch:latest .
+          
+      - name: Push Docker image
         run: |
-          docker tag dispatch ${name}/dispatch:latest
-          docker push ${name}/dispatch:latest
+          docker push asia-south2-docker.pkg.dev/iconic-vine-445014-t7/kubernetesproject/dispatch:latest
