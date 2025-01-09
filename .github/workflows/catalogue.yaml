@@ -1,42 +1,44 @@
-name: Catalogue
-
+name: Cart
 on:
   push:
     branches:
       - master
     paths:
-      - '**.js'  # Only trigger on changes to Python files (**.py)
-      - '.github/workflows/catalogue.yaml'  # Include workflow file changes
-
+      - 'catalogue/**'
+      - '.github/workflows/catalogue.yaml'
   pull_request:
     branches:
       - master
     paths:
-      - '**.js'  # Only trigger on changes to Python files (**.py)
-      - '.github/workflows/catalogue.yaml'  # Include workflow file changes
-
+      - 'catalogue/**'
+      - '.github/workflows/catalogue.yaml'
 jobs:
-  payment:
-    name: Build and deploy catalogue microservice
-    runs-on: [self-hosted]  # Use a standard runner instead of self-hosted
-
+  cart:
+    name: Build and deploy cart microservice
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout code 
+      - name: Checkout code
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
-      - name: NPM install
-        run: npm install 
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker auth
+        run: |
+          gcloud auth configure-docker asia-south2-docker.pkg.dev
 
       - name: Build Docker image
+        working-directory: ./catalogue
         run: |
-          docker build -t catalogue .  # Build image tagged as 'payment' from current directory
-
-      - name: Docker Login (use secrets)
-        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Docker Push
+          docker build -t asia-south2-docker.pkg.dev/iconic-vine-445014-t7/kubernetesproject/catalogue:latest .
+          
+      - name: Push Docker image
         run: |
-          docker tag catalogue ${name}/catalogue:latest
-          docker catalogue ${name}/catalogue:latest
+          docker push asia-south2-docker.pkg.dev/iconic-vine-445014-t7/kubernetesproject/catalogue:latest
