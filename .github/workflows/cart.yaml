@@ -1,44 +1,35 @@
 name: Cart
-
 on:
   push:
     branches:
       - master
     paths:
-      - 'cart/**'                      # Only trigger for changes in the cart folder
-      - '.github/workflows/cart.yaml'  # Trigger if the workflow file itself changes
-
+      - 'cart/**'
+      - '.github/workflows/cart.yaml'
   pull_request:
     branches:
       - master
     paths:
-      - 'cart/**'                      # Only trigger for changes in the cart folder
-      - '.github/workflows/cart.yaml'  # Trigger if the workflow file itself changes
-
+      - 'cart/**'
+      - '.github/workflows/cart.yaml'
 jobs:
   cart:
     name: Build and deploy cart microservice
-    runs-on: ubuntu-latest             # Use a standard GitHub-hosted runner
-
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
-      - name: Validate JSON Key
+      - name: Docker Login to GCR
         run: |
-          echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > /tmp/key.json
-          cat /tmp/key.json  # Check the JSON content for correctness
-
-      - name: Authenticate with GCR
-        run: docker login -u _json_key --password-stdin https://gcr.io/v2
+          echo '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}' | docker login -u _json_key --password-stdin https://gcr.io
            
-
       - name: Build Docker image
         run: |
           docker build -t gcr.io/kubernetesproject/cart:latest .
-
+          
       - name: Push Docker image to GCR
         run: |
           docker push gcr.io/kubernetesproject/cart:latest
