@@ -27,6 +27,7 @@ jobs:
           echo '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}' | docker login -u _json_key --password-stdin https://gcr.io
            
       - name: Build Docker image
+        working-directory: ./cart
         run: |
           docker build -t gcr.io/kubernetesproject/cart:latest .
           
