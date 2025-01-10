@@ -1,0 +1,44 @@
+name: Cart
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'mongo/**'
+      - '.github/workflows/mongo.yaml'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'cart/**'
+      - '.github/workflows/mongo.yaml'
+jobs:
+  cart:
+    name: Build and deploy cart microservice
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker auth
+        run: |
+          gcloud auth configure-docker asia-south2-docker.pkg.dev
+
+      - name: Build Docker image
+        working-directory: ./cart
+        run: |
+          docker build -t asia-south2-docker.pkg.dev/iconic-vine-445014-t7/kubernetesproject/mongo:latest .
+          
+      - name: Push Docker image
+        run: |
+          docker push asia-south2-docker.pkg.dev/iconic-vine-445014-t7/kubernetesproject/mongo:latest
