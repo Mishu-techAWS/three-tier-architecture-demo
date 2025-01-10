@@ -1,4 +1,4 @@
-name: Cart
+name: Mongo
 on:
   push:
     branches:
